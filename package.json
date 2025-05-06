@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "jest"
+    "test": "jest",
+    "cypress": "cypress open",
+    "test:e2e": "cypress run"
   },
   "keywords": [
     "node",
@@ -18,9 +20,11 @@
     "@aws-sdk/client-bedrock-runtime": "^3.525.0",
     "dotenv": "^16.5.0",
     "express": "^4.18.2",
+    "ejs": "^3.1.9",
     "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
+    "cypress": "^12.14.0",
     "jest": "^29.5.0",
     "nodemon": "^2.0.22"
   }

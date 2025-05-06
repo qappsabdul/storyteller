@@ -1,0 +1,67 @@
+/* General styles */
+body {
+    background-color: #f8f9fa;
+}
+
+/* Chat styles */
+#chatMessages {
+    background-color: #fff;
+}
+
+.user-message, .system-message, .error-message {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    max-width: 80%;
+}
+
+.user-message {
+    background-color: #dcf8c6;
+    align-self: flex-end;
+    margin-left: 20%;
+}
+
+.system-message {
+    background-color: #f1f0f0;
+    align-self: flex-start;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.loading {
+    opacity: 0.6;
+}
+
+/* Card hover effects */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* Button styles */
+.btn-primary {
+    background-color: #4e73df;
+    border-color: #4e73df;
+}
+
+.btn-primary:hover {
+    background-color: #2e59d9;
+    border-color: #2653d4;
+}
+
+/* Image preview styles */
+#imagePreviewContainer {
+    position: relative;
+}
+
+#imagePreview {
+    max-height: 300px;
+    object-fit: contain;
+}

@@ -1,0 +1,115 @@
+<div class="card">
+    <div class="card-header">
+        <h2>Image to Story Generator</h2>
+    </div>
+    <div class="card-body">
+        <p class="card-text">Upload an image and Claude AI will generate a creative story based on it.</p>
+        
+        <form id="imageToStoryForm" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="image" class="form-label">Select Image</label>
+                <input class="form-control" type="file" id="image" name="image" accept="image/*" required>
+                <div class="form-text">Supported formats: JPG, PNG, GIF (Max size: 5MB)</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="storyType" class="form-label">Story Type</label>
+                <select class="form-select" id="storyType" name="storyType">
+                    <option value="children">Children's Story</option>
+                    <option value="adventure">Adventure</option>
+                    <option value="mystery">Mystery</option>
+                    <option value="scifi">Science Fiction</option>
+                    <option value="fantasy">Fantasy</option>
+                </select>
+            </div>
+            
+            <div id="imagePreviewContainer" class="mb-3 d-none">
+                <label class="form-label">Image Preview</label>
+                <div class="position-relative">
+                    <img id="imagePreview" class="img-fluid rounded" src="#" alt="Image Preview">
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" id="generateStoryBtn">
+                Generate Story
+            </button>
+        </form>
+        
+        <div id="resultContainer" class="mt-4 d-none">
+            <h3>Generated Story</h3>
+            <div id="loadingIndicator" class="text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Generating your story...</p>
+            </div>
+            <div id="storyContent" class="border rounded p-3 bg-light"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const imageInput = document.getElementById('image');
+    const imagePreview = document.getElementById('imagePreview');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const imageToStoryForm = document.getElementById('imageToStoryForm');
+    const resultContainer = document.getElementById('resultContainer');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const storyContent = document.getElementById('storyContent');
+    
+    // Show image preview when file is selected
+    imageInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreviewContainer.classList.remove('d-none');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            imagePreviewContainer.classList.add('d-none');
+        }
+    });
+    
+    // Handle form submission
+    imageToStoryForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        
+        const formData = new FormData();
+        formData.append('image', imageInput.files[0]);
+        formData.append('storyType', document.getElementById('storyType').value);
+        
+        // Show result container and loading indicator
+        resultContainer.classList.remove('d-none');
+        loadingIndicator.style.display = 'block';
+        storyContent.style.display = 'none';
+        storyContent.textContent = '';
+        
+        try {
+            const response = await fetch('/api/stories/generate-from-image', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            // Hide loading indicator
+            loadingIndicator.style.display = 'none';
+            storyContent.style.display = 'block';
+            
+            if (data.success) {
+                storyContent.textContent = data.story;
+            } else {
+                storyContent.innerHTML = `<div class="alert alert-danger">Error: ${data.error || 'Failed to generate story'}</div>`;
+            }
+        } catch (error) {
+            // Hide loading indicator and show error
+            loadingIndicator.style.display = 'none';
+            storyContent.style.display = 'block';
+            storyContent.innerHTML = `<div class="alert alert-danger">Error: ${error.message || 'Failed to connect to server'}</div>`;
+        }
+    });
+});
+</script>
