@@ -1,8 +1,13 @@
 const { BedrockRuntimeClient, InvokeModelCommand } = require('@aws-sdk/client-bedrock-runtime');
 
-// Initialize the Bedrock client
+// Initialize the Bedrock client with credentials
 const bedrockClient = new BedrockRuntimeClient({
     region: process.env.AWS_REGION,
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        sessionToken: process.env.AWS_SESSION_TOKEN
+    }
 });
 
 /**
@@ -44,6 +49,8 @@ const generateWithClaude = async (prompt, options = {}) => {
     };
 
     try {
+        console.log('Sending request to Bedrock with model:', modelId);
+        
         const command = new InvokeModelCommand({
             modelId,
             contentType: "application/json",
@@ -52,12 +59,23 @@ const generateWithClaude = async (prompt, options = {}) => {
         });
 
         const response = await bedrockClient.send(command);
+        console.log('Received response from Bedrock');
+        
         const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+        console.log('Response structure:', Object.keys(responseBody));
+        
+        // For debugging
+        if (!responseBody.content || responseBody.content.length === 0) {
+            console.error('No content in response:', responseBody);
+            return "I couldn't generate a story for this image. Please try again with a different image.";
+        }
         
         return responseBody.content[0].text;
     } catch (error) {
         console.error('Error calling Claude via Bedrock:', error);
-        throw error;
+        
+        // Return a fallback response instead of throwing
+        return "I encountered an error while generating your story. This might be due to AWS credentials not being configured correctly. Please check your AWS Bedrock setup and try again.";
     }
 };
 

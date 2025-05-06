@@ -100,7 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
             storyContent.style.display = 'block';
             
             if (data.success) {
-                storyContent.textContent = data.story;
+                // Check if story is directly in the response or in data.story
+                const storyText = data.story || (data.data && data.data.story);
+                storyContent.textContent = storyText || 'No story content received';
+                
+                // Log for debugging
+                console.log('Story response:', data);
             } else {
                 storyContent.innerHTML = `<div class="alert alert-danger">Error: ${data.error || 'Failed to generate story'}</div>`;
             }

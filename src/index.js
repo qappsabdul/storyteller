@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const expressLayouts = require('express-ejs-layouts');
 const routes = require('./routes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const app = express();
@@ -22,6 +23,8 @@ app.use(express.static(path.join(__dirname, '../public')));
 // View engine setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use(expressLayouts);
+app.set('layout', 'layouts/main');
 
 // Routes
 app.use('/', routes);
