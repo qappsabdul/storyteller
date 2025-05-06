@@ -1,0 +1,116 @@
+<div class="card">
+    <div class="card-header">
+        <h2>Chat with Claude AI</h2>
+    </div>
+    <div class="card-body">
+        <div class="mb-4">
+            <div id="chatMessages" class="border rounded p-3 mb-3" style="height: 300px; overflow-y: auto;">
+                <div class="system-message">Hello! I'm Claude, an AI assistant. How can I help you today?</div>
+            </div>
+            
+            <form id="promptForm">
+                <div class="mb-3">
+                    <label for="prompt" class="form-label">Your message</label>
+                    <textarea id="prompt" class="form-control" rows="3" required></textarea>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="maxTokens" class="form-label">Max Tokens</label>
+                        <input type="number" id="maxTokens" class="form-control" value="1024" min="10" max="4096">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="temperature" class="form-label">Temperature</label>
+                        <input type="number" id="temperature" class="form-control" value="0.7" min="0" max="1" step="0.1">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="topP" class="form-label">Top P</label>
+                        <input type="number" id="topP" class="form-control" value="0.9" min="0" max="1" step="0.1">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="submitPrompt">
+                    Send Message
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const promptForm = document.getElementById('promptForm');
+    const chatMessages = document.getElementById('chatMessages');
+    
+    promptForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        
+        const prompt = document.getElementById('prompt').value;
+        const maxTokens = document.getElementById('maxTokens').value;
+        const temperature = document.getElementById('temperature').value;
+        const topP = document.getElementById('topP').value;
+        
+        // Add user message to chat
+        const userMessageDiv = document.createElement('div');
+        userMessageDiv.className = 'user-message';
+        userMessageDiv.textContent = prompt;
+        chatMessages.appendChild(userMessageDiv);
+        
+        // Show loading indicator
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'system-message loading';
+        loadingDiv.textContent = 'Claude is thinking...';
+        chatMessages.appendChild(loadingDiv);
+        
+        // Scroll to bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        try {
+            const response = await fetch('/api/claude/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    prompt,
+                    maxTokens: parseInt(maxTokens),
+                    temperature: parseFloat(temperature),
+                    topP: parseFloat(topP)
+                })
+            });
+            
+            const data = await response.json();
+            
+            // Remove loading indicator
+            chatMessages.removeChild(loadingDiv);
+            
+            if (data.success) {
+                // Add assistant message to chat
+                const assistantMessageDiv = document.createElement('div');
+                assistantMessageDiv.className = 'system-message';
+                assistantMessageDiv.textContent = data.response;
+                chatMessages.appendChild(assistantMessageDiv);
+            } else {
+                // Add error message
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = `Error: ${data.error || 'Failed to process request'}`;
+                chatMessages.appendChild(errorDiv);
+            }
+        } catch (error) {
+            // Remove loading indicator
+            chatMessages.removeChild(loadingDiv);
+            
+            // Add error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = `Error: ${error.message || 'Failed to connect to server'}`;
+            chatMessages.appendChild(errorDiv);
+        }
+        
+        // Clear input and scroll to bottom
+        document.getElementById('prompt').value = '';
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+});
+</script>
