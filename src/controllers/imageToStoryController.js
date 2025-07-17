@@ -91,7 +91,3 @@ const generateStoryFromImage = async (req, res) => {
 module.exports = {
     generateStoryFromImage
 };
-
-module.exports = {
-    generateStoryFromImage
-};
